@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .photo-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+        .photo-box {
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            width: 300px;
+            margin: 10px;
+            padding: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+            text-align: center;
+        }
+        .photo-box:hover {
+            transform: scale(1.05);
+        }
+        .photo-box img {
+            max-width: 100%;
+            border-radius: 10px;
+        }
+        .photo-box .title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .photo-box .uploader {
+            font-size: 14px;
+            color: #555;
+        }
+        .photo-box .view-comments {
+            margin-top: 10px;
+        }
+        .photo-box .view-comments a {
+            text-decoration: none;
+            color: #007bff;
+        }
+        .photo-box .view-comments a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Dashboard</h1>
+    <p>Welcome, {{ username }}!</p>
+    <a href="{{ url_for('home') }}">Home</a> | 
+    <a href="{{ url_for('logout') }}">Logout</a>
+
+    <div class="photo-container">
+        {% for photo in photos %}
+            <div class="photo-box">
+                <img src="{{ url_for('static', filename=photo['filename']) }}" alt="{{ photo['title'] }}">
+                <div class="title">{{ photo['title'] }}</div>
+                <div class="uploader">Uploaded by: {{ photo['uploader'] }}</div>
+                <div class="view-comments">
+                    <a href="{{ url_for('photo', photo_id=photo['_id']) }}">View Comments</a>
+                </div>
+                {% if photo['user'] == session['username'] %}
+                    <form action="{{ url_for('delete_photo', photo_id=photo['_id']) }}" method="post">
+                        <input type="submit" value="Delete">
+                    </form>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+
+    <div>
+        <h2>Upload New Photo</h2>
+        <form action="{{ url_for('upload_file') }}" method="post" enctype="multipart/form-data">
+            <input type="file" name="photo">
+            <input type="text" name="title" placeholder="Photo Title">
+            <button type="submit">Upload</button>
+        </form>
+    </div>
+</body>
+</html>

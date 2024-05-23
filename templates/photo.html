@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .photo-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .photo-container img {
+            max-width: 100%;
+            width: auto;
+            height: auto;
+            max-height: 600px;  /* Set the maximum height for the image */
+            max-width: 600px;   /* Set the maximum width for the image */
+            object-fit: contain;  /* Maintain aspect ratio and fit within the container */
+            border-radius: 10px;
+        }
+        .comments-container {
+            margin-top: 20px;
+        }
+        .comment-box {
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            margin: 10px;
+            padding: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .comment-box .username {
+            font-weight: bold;
+        }
+        .comment-box .comment-text {
+            margin-top: 5px;
+        }
+        .comment-box .delete-comment {
+            margin-top: 10px;
+            margin-left:0px;
+        }
+        .comment-box .delete-comment a {
+            text-decoration: none;
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="photo-container">
+        <h1>{{ photo['title'] }}</h1>
+        <img src="{{ url_for('static', filename=photo['filename']) }}" alt="{{ photo['title'] }}">
+        <h2>Comments</h2>
+        <div class="comments-container">
+            {% for comment in comments %}
+                <div class="comment-box">
+                    <div class="username">{{ comment['username'] }}</div>
+                    <div class="comment-text">{{ comment['comment'] }}</div>
+                    {% if comment['username'] == session['username'] %}
+                        <div class="delete-comment">
+                            <a href="{{ url_for('delete_comment', comment_id=comment['_id'], photo_id=photo['_id']) }}">Delete</a>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+        <form method="POST" action="{{ url_for('add_comment') }}">
+            <input type="hidden" name="photo_id" value="{{ photo['_id'] }}">
+            <textarea name="comment" placeholder="Add a comment"></textarea>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+</body>
+</html>
