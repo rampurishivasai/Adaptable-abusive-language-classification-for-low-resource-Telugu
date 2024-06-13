@@ -1,0 +1,11 @@
+indicnlp.ft.te.300.bin
+
+# # Ignore all log files
+# *.log
+
+# # Ignore specific directory
+# node_modules/
+
+# # Ignore specific file
+# config/local.env
+
