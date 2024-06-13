@@ -15,12 +15,12 @@ app.secret_key = 'supersecretkey'
 client = MongoClient('mongodb://localhost:27017/')
 db = client['flask_app']
 users_collection = db['users']
-photos_collection = db['photos']
+photos_collection = db['posts']
 comments_collection = db['comments']
 
 # Configure file upload
 UPLOAD_FOLDER = 'static/uploads'
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'mp4'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 def allowed_file(filename):
@@ -118,38 +118,60 @@ def delete_comment(comment_id, photo_id):
 
 
 from PIL import Image
-
 @app.route('/upload', methods=['POST'])
 def upload_file():
     if 'username' in session:
-        if 'photo' not in request.files:
-            flash('No file part')
+        title = request.form['title']
+        text_content = request.form.get('text', '')
+
+        post_type = request.form['post_type']
+        file = request.files.get('photo') if post_type == 'photo' else request.files.get('video')
+
+        content = None
+
+        if post_type == 'text':
+            content = text_content
+        elif file and file.filename != '':
+            if allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                file.save(file_path)
+
+                if file.mimetype.startswith('image'):
+                    post_type = 'photo'
+                    resized_path = os.path.join(app.config['UPLOAD_FOLDER'], 'resized_' + filename)
+                    with Image.open(file_path) as img:
+                        img.thumbnail((800, 600))  # Set the maximum dimensions
+                        img.save(resized_path)
+                    content = 'uploads/resized_' + filename
+                elif file.mimetype.startswith('video'):
+                    post_type = 'video'
+                    content = 'uploads/' + filename
+            else:
+                flash('File type not allowed')
+                return redirect(url_for('dashboard'))
+        else:
+            flash('No content provided')
             return redirect(url_for('dashboard'))
-        file = request.files['photo']
-        if file.filename == '':
-            flash('No selected file')
-            return redirect(url_for('dashboard'))
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(file_path)
-            
-            # Resize the image
-            resized_path = os.path.join(app.config['UPLOAD_FOLDER'], 'resized_' + filename)
-            with Image.open(file_path) as img:
-                img.thumbnail((800, 600))  # Set the maximum dimensions
-                img.save(resized_path)
-            
-            # Save photo with dimensions
-            photos_collection.insert_one({
+
+        if content:
+            posts_collection.insert_one({
                 'user': session['username'],
-                'title': request.form['title'],
-                'filename': f'uploads/resized_{filename}'  # Save the resized image path
+                'title': title,
+                'content': content,
+                'type': post_type,
+                'likes': 0,
+                'dislikes': 0,
+                'reactions': {}  # Initialize reactions as an empty dictionary
             })
+            return redirect(url_for('dashboard'))
+        else:
+            flash('Error uploading content')
             return redirect(url_for('dashboard'))
     else:
         flash('You are not logged in')
         return redirect(url_for('login_route'))
+
     
 @app.route('/delete_photo/<photo_id>', methods=['POST'])
 def delete_photo(photo_id):
