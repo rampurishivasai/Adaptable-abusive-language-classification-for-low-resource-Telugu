@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ post['title'] }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #f8f9fa;
+            padding: 10px 20px 20px 5px;
+            display: flex;
+            justify-content: space-evenly;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        /* Home and logout buttons */
+        .navbar-btn {
+            text-decoration: none;
+            justify-content: space-evenly;
+            color: #007bff;
+            font-weight: bold;
+            padding: 5px 10px;
+            border: 1px solid transparent;
+            border-radius: 5px;
+        }
+
+        .navbar-btn:hover {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        /* Dashboard and post content */
+        .content {
+            margin-top: 60px; /* Adjust for the height of the fixed navbar */
+        }
+        .post-container {
+            margin: 20px;
+        }
+        .post-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .post-content img, .post-content video {
+            max-width: 100%;
+            border-radius: 10px;
+        }
+        .post-content p {
+            font-size: 16px;
+        }
+        .comments-section {
+            margin-top: 20px;
+        }
+        .comments-section h3 {
+            font-size: 20px;
+        }
+        .comment-box {
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .comment-box .comment-username {
+            font-weight: bold;
+        }
+        .add-comment {
+            margin-top: 20px;
+        }
+        .reactions {
+            display: flex;     
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .reactions span {
+            cursor: pointer;
+            font-size: 24px;
+        }
+        .reaction-selected {
+            background-color: #007bff; /* Change the background color to blue */
+            color: white; /* Change the text color to white */
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <a href="{{ url_for('home') }}" class="navbar-btn">Home</a>
+        <a href="{{ url_for('dashboard') }}" class="navbar-btn">Dashboard</a>
+        <a href="{{ url_for('logout') }}" class="navbar-btn">Logout</a>
+    </div>
+
+    <div class="content">
+        <!-- Your dashboard or post content goes here -->
+        {% block content %}
+        {% endblock %}
+    </div>
+    <script>
+        // JavaScript to add fixed navigation bar on scroll
+        window.addEventListener('scroll', function() {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 0) {
+                navbar.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+            } else {
+                navbar.style.boxShadow = 'none';
+            }
+        });
+    </script>
+    <div class="post-container">
+        <div class="post-title">{{ post['title'] }}</div>
+        <div class="post-content">
+            {% if post.type == 'photo' %}
+                <img src="{{ url_for('static', filename=post['content']) }}" alt="{{ post['title'] }}">
+            {% elif post.type == 'video' %}
+                <video controls>
+                    <source src="{{ url_for('static', filename=post['content']) }}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            {% elif post.type == 'text' %}
+                <p>{{ post['content'] }}</p>
+            {% endif %}
+        </div>
+        <div class="reactions">
+            <form action="{{ url_for('react_to_post', post_id=post['_id']) }}" method="post">
+                <input type="hidden" name="reaction" value="👍">
+                <button type="submit">👍</button>
+            </form>
+            <form action="{{ url_for('react_to_post', post_id=post['_id']) }}" method="post">
+                <input type="hidden" name="reaction" value="❤️">
+                <button type="submit">❤️</button>
+            </form>
+            <form action="{{ url_for('react_to_post', post_id=post['_id']) }}" method="post">
+                <input type="hidden" name="reaction" value="😂">
+                <button type="submit">😂</button>
+            </form>
+            <!-- Add more emoji reactions as needed -->
+        </div>
+        <div class="comments-section">
+            <h3>Comments</h3>
+            {% for comment in comments %}
+                <div class="comment-box">
+                    <div class="comment-username">{{ comment['username'] }}</div>
+                    <div class="comment-text">{{ comment['comment'] }}</div>
+                    <div class="reactions">
+                        <form action="{{ url_for('react_to_comment', comment_id=comment['_id'], post_id=post['_id']) }}" method="post">
+                            <input type="hidden" name="reaction" value="👍">
+                            <button type="submit" class="{% if selected_reaction == '👍' %} reaction-selected {% endif %}">👍</button>
+                        </form>
+                        <form action="{{ url_for('react_to_comment', comment_id=comment['_id'], post_id=post['_id']) }}" method="post">
+                            <input type="hidden" name="reaction" value="👎">
+                            <button type="submit" class="{% if selected_reaction == '👎' %} reaction-selected {% endif %}">👎</button>
+                        </form>
+                        
+                        
+                                                
+                        {% if comment['username'] == session['username'] %}
+                            <form action="{{ url_for('delete_comment', comment_id=comment['_id'], post_id=post['_id']) }}" method="post">
+                                <button type="submit">Delete</button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+            <div class="add-comment">
+                <h4>Add a Comment</h4>
+                <form action="{{ url_for('add_comment') }}" method="post">
+                    <input type="hidden" name="post_id" value="{{ post['_id'] }}">
+                    <textarea name="comment" rows="4" required></textarea>
+                    <button type="submit">Add Comment</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
