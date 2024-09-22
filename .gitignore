@@ -1,7 +1,7 @@
-<<<<<<< HEAD
+
 indicnlp.ft.te.300.bin
-=======
-indicnlp.ft.te.300.bin
+# __pycache__/
+
 
 
 # # Ignore all log files
@@ -12,4 +12,4 @@ indicnlp.ft.te.300.bin
 
 # # Ignore specific file
 # config/local.env
->>>>>>> upload_window_change
+
