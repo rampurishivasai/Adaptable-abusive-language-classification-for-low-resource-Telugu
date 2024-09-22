@@ -2,12 +2,15 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from werkzeug.utils import secure_filename
 from pymongo import MongoClient
 from bson.objectid import ObjectId
+# from flask import Flask
+# from flask_wtf.csrf import CSRFProtect
 from werkzeug.security import generate_password_hash, check_password_hash
 from model import load_svm_model, classify_text
 from PIL import Image
 import os
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
+# csrf = CSRFProtect(app)
 
 # Configure MongoDB
 client = MongoClient('mongodb://localhost:27017/')
@@ -216,6 +219,15 @@ def delete_post(post_id):
         return redirect(url_for('login'))
 
 @app.route('/react_to_post/<post_id>', methods=['POST'])
+# def react_to_post(post_id):
+#     if 'username' in session:
+#         reaction = request.form['reaction']
+#         post = posts_collection.find_one({'_id': ObjectId(post_id)})
+#         if reaction == 'like':
+#             posts_collection.update_one({'_id': ObjectId(post_id)}, {'$inc': {'likes': 1}})
+#         elif reaction == 'dislike':
+#             posts_collection.update_one({'_id': ObjectId(post_id)}, {'$inc': {'dislikes': 1}})
+#         return redirect(url_for('dashboard'))
 
 def react_to_post(post_id):
     if 'username' in session:
@@ -233,8 +245,25 @@ def react_to_post(post_id):
                 posts_collection.update_one({'_id': ObjectId(post_id)}, {'$inc': {'likes': -1}})
                 reactions_collection.delete_one({'post_id': post_id, 'username': username})
             else:
+                # User disliked before, update to like
+                # if existing_reaction and existing_reaction['reaction'] == 'dislike':
+                #     posts_collection.update_one({'_id': ObjectId(post_id)}, {'$inc': {'dislikes': -1}})
                 posts_collection.update_one({'_id': ObjectId(post_id)}, {'$inc': {'likes': 1}})
                 reactions_collection.update_one({'post_id': post_id, 'username': username}, {'$set': {'reaction': 'like'}}, upsert=True)
+
+        # elif reaction == 'dislike':
+        #     # Update post dislikes and handle existing reaction
+        #     if existing_reaction and existing_reaction['reaction'] == 'dislike':
+        #         # User already disliked, remove dislike
+        #         posts_collection.update_one({'_id': ObjectId(post_id)}, {'$inc': {'dislikes': -1}})
+        #         reactions_collection.delete_one({'post_id': post_id, 'username': username})
+        #     else:
+        #         # User liked before, update to dislike
+        #         if existing_reaction and existing_reaction['reaction'] == 'like':
+        #             posts_collection.update_one({'_id': ObjectId(post_id)}, {'$inc': {'likes': -1}})
+        #         posts_collection.update_one({'_id': ObjectId(post_id)}, {'$inc': {'dislikes': 1}})
+        #         reactions_collection.update_one({'post_id': post_id, 'username': username}, {'$set': {'reaction': 'dislike'}}, upsert=True)
+
     return redirect(url_for('dashboard'))
 
 
@@ -256,8 +285,24 @@ def react_to_comment(comment_id, post_id):
                 comments_collection.update_one({'_id': ObjectId(comment_id)}, {'$inc': {'likes': -1}})
                 comment_reactions_collection.delete_one({'comment_id': comment_id, 'post_id': post_id,'username': username})
             else:
-               comments_collection.update_one({'_id': ObjectId(comment_id)}, {'$inc': {'likes': 1}})
-               comment_reactions_collection.update_one({'comment_id': comment_id,'post_id': post_id, 'username': username}, {'$set': {'reaction': 'like'}}, upsert=True)
+                # User disliked before, update to like
+                # if existing_reaction and existing_reaction['reaction'] == 'dislike':
+                #     comments_collection.update_one({'_id': ObjectId(comment_id)}, {'$inc': {'dislikes': -1}})
+                comments_collection.update_one({'_id': ObjectId(comment_id)}, {'$inc': {'likes': 1}})
+                comment_reactions_collection.update_one({'comment_id': comment_id,'post_id': post_id, 'username': username}, {'$set': {'reaction': 'like'}}, upsert=True)
+
+        # elif reaction == 'dislike':
+        #     # Update post dislikes and handle existing reaction
+        #     if existing_reaction and existing_reaction['reaction'] == 'dislike':
+        #         # User already disliked, remove dislike
+        #         comments_collection.update_one({'_id': ObjectId(comment_id)}, {'$inc': {'dislikes': -1}})
+        #         comment_reactions_collection.delete_one({'comment_id': comment_id, 'username': username})
+        #     else:
+        #         # User liked before, update to dislike
+        #         if existing_reaction and existing_reaction['reaction'] == 'like':
+        #             comments_collection.update_one({'_id': ObjectId(comment_id)}, {'$inc': {'likes': -1}})
+        #         comments_collection.update_one({'_id': ObjectId(comment_id)}, {'$inc': {'dislikes': 1}})
+        #         comment_reactions_collection.update_one({'comment_id': comment_id, 'username': username}, {'$set': {'reaction': 'dislike'}}, upsert=True)
 
     return redirect(url_for('post', post_id=post_id))
 

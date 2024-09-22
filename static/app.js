@@ -17,3 +17,4 @@ function processText() {
         document.getElementById('result').textContent = 'Result: ' + data.result;
     });
 }
+ 
