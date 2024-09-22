@@ -3,17 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{{ url_for('static', filename='icon.png') }}" type="image/png">
     <title>Login</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+    <div style="display: flex; align-items: center; justify-content: center; ">
+        <img src="{{ url_for('static', filename='icon.png') }}" alt="Signup Image" style="width: 150px; height: 150px; border-radius: 50%; margin-right: 15px;">
+        <h1 style="margin: 0;">Trendze</h1>
+    </div>
+    
+    
     <h1>Login</h1>
     <form method="POST">
         <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required><br>
+        <input type="text" id="username" name="username" style="font-size:1.5em;margin-top: 15px;" required><br>
         <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required><br>
-        <button type="submit">Login</button>
+        <input type="password" id="password" name="password" style="font-size:1.5em;margin-top: 15px;" required><br>
+        <button type="submit" style="font-size:1.5em;margin-top: 15px;">Login</button>
     </form>
     <p>{{ get_flashed_messages()[0] if get_flashed_messages() else '' }}</p>
     <a href="{{ url_for('signup_route') }}">Don't have an account? Signup here</a>

@@ -1,7 +1,255 @@
 body {
     font-family: Arial, sans-serif;
-    background-color: #f0f0f0;
+    background-color: #1d76c526;
     color: #333;
     text-align: center;
     padding: 50px;
+    background-image: url("bg.jpg");
+    background-position: center; /* Center the image */
+  background-repeat: no-repeat; /* Do not repeat the image */
+  background-size: cover;
+}
+body {
+  font-family: Arial, sans-serif;
+  background-color: #1d76c526;
+
+}
+.header {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #f8f9fa;
+  padding: 20px;
+  position: fixed;
+  width: 100%;
+  top: 0;
+  z-index: 1000;
+}
+
+.header h1 {
+  margin-bottom: 10px;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-around;
+  padding: 5px;
+  width: 100%;
+}
+
+.navbar-btn {
+  color: white;
+  text-decoration: none;
+  margin: 0 10px;
+}
+
+.upload-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+.header h1 {
+  margin: 0;
+}
+.header a {
+  text-decoration: none;
+  color: #007bff;
+}
+
+
+.navbar-btn:hover {
+  background-color: #007bff;
+  color: #fff;
+}
+
+.posts {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 50px;
+}
+.post {
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  width: 600px;
+  margin-bottom: 20px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.post img, .post video {
+  max-width: 100%;
+  border-radius: 10px;
+}
+.post h3 {
+  margin-top: 0;
+}
+.post p {
+  margin: 5px 0;
+}
+.post .actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+.post .actions form {
+  display: inline;
+}
+.post .reactions {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-top: 10px;
+}
+.post .reactions form {
+  margin-right: 10px;
+}
+.upload-button {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+.upload-button button {
+  font-size: 24px;
+  padding: 10px 20px;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  border-radius: 50%;
+  cursor: pointer;
+}
+.upload-form-modal {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+.upload-form-modal form {
+  display: flex;
+  flex-direction: column;
+}
+.upload-form-modal form input,
+.upload-form-modal form textarea,
+.upload-form-modal form button {
+  margin-bottom: 10px;
+}
+.upload-form-modal form button {
+  padding: 10px;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+}
+.overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+.post-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.post {
+  padding: 15px;
+  border: 1px solid #ddd;
+  margin-bottom: 10px;
+  transition: background-color 0.3s ease;
+}
+
+.post:hover {
+  background-color: #f0f0f0;
+  cursor: pointer;
+}
+
+.actions a {
+  margin-right: 10px;
+}
+
+.actions form, .reactions form {
+  display: inline;
+}
+
+
+
+
+.upload-form-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 33%; /* 1/3rd of the page */
+  background-color: #f9f9f9; /* Light background color */
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  max-width: 600px; /* Set a max width for responsiveness */
+  min-height: 300px; /* Set a minimum height */
+}
+
+.upload-form-modal h2 {
+  text-align: center;
+}
+
+.upload-form-modal form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.upload-form-modal input[type="text"],
+.upload-form-modal textarea,
+.upload-form-modal input[type="file"],
+.upload-form-modal button {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+}
+
+.upload-form-modal button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.upload-form-modal button:hover {
+  background-color: #0056b3;
+}
+
+.posts_view {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between; /* Space between posts */
+}
+
+.post-link {
+  flex: 1 1 calc(33.333% - 10px); /* 3 posts per row with margin */
+  margin: 5px; /* Margin between posts */
+  box-sizing: border-box; /* Include padding and border in the element's total width */
+}
+
+.post {
+  border: 1px solid #ccc; /* Optional: border for posts */
+  padding: 10px; /* Optional: padding for posts */
+  background-color: #fff; /* Optional: background color */
+  border-radius: 5px; /* Optional: rounded corners */
+  text-align: center; /* Center the content */
 }

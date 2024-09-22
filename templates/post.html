@@ -3,235 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px;
-            background-color: #f8f9fa;
-            position: fixed;
-            top: 0;
-            width: 100%;
-            z-index: 1000;
-        }
-        .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            background-color: #e9ecef;
-            position: fixed;
-            top: 60px; /* Height of the header */
-            width: 100%;
-            z-index: 999;
-        }
-        .navbar a {
-            text-decoration: none;
-            color: #007bff;
-            padding: 10px;
-        }
-        .posts {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-top: 120px; /* Height of the header and navbar */
-        }
-        .post {
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            width: 600px;
-            margin-bottom: 20px;
-            padding: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        .post img, .post video {
-            max-width: 100%;
-            border-radius: 10px;
-        }
-        .post h3 {
-            margin-top: 0;
-        }
-        .post p {
-            margin: 5px 0;
-        }
-        .post .actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 10px;
-        }
-        .post .actions form {
-            display: inline;
-        }
-        .post .reactions {
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
-            margin-top: 10px;
-        }
-        .post .reactions form {
-            margin-right: 10px;
-        }
-        .upload-button {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-        }
-        .upload-button button {
-            font-size: 24px;
-            padding: 10px 20px;
-            border: none;
-            background-color: #007bff;
-            color: white;
-            border-radius: 50%;
-            cursor: pointer;
-        }
-        .upload-form-modal {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: white;
-            padding: 30px;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            width: 400px;
-        }
-        .upload-form-modal form {
-            display: flex;
-            flex-direction: column;
-        }
-        .upload-form-modal form input,
-        .upload-form-modal form textarea,
-        .upload-form-modal form button {
-            margin-bottom: 10px;
-        }
-        .upload-form-modal form button {
-            padding: 10px;
-            border: none;
-            background-color: #007bff;
-            color: white;
-            cursor: pointer;
-        }
-        .overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 999;
-        }
-    </style>
-    <script>
-        function openUploadForm() {
-            document.getElementById('uploadFormModal').style.display = 'block';
-            document.getElementById('overlay').style.display = 'block';
-        }
+    <link rel="icon" href="{{ url_for('static', filename='icon.png') }}" type="image/png">
+    <title>{{ post['title'] }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style1.css') }}">
 
-        function closeUploadForm() {
-            document.getElementById('uploadFormModal').style.display = 'none';
-            document.getElementById('overlay').style.display = 'none';
-        }
-
-        function showInputFields() {
-            var postType = document.querySelector('input[name="post_type"]:checked').value;
-            document.getElementById('textFields').style.display = postType === 'text' ? 'block' : 'none';
-            document.getElementById('photoFields').style.display = postType === 'photo' ? 'block' : 'none';
-            document.getElementById('videoFields').style.display = postType === 'video' ? 'block' : 'none';
-        }
-    </script>
 </head>
 <body>
-    <div class="header">
-        <h1>Welcome, {{ username }}!</h1>
-        <div class="navbar">
-            <a href="{{ url_for('home') }}" class="navbar-btn">Home</a>
-            <a href="{{ url_for('dashboard') }}" class="navbar-btn">Dashboard</a>
-            <a href="{{ url_for('logout') }}" class="navbar-btn">Logout</a>
-        </div>
+    <div class="navbar">
+        <a href="{{ url_for('dashboard') }}" class="navbar-btn">Home</a>
+        <a href="{{ url_for('profile') }}" class="navbar-btn">profile</a>
+        <a href="{{ url_for('logout') }}" class="navbar-btn">Logout</a>
     </div>
 
-    <div class="posts">
-        {% for post in posts %}
-            <div class="post">
-                <h3>{{ post['title'] }}</h3>
-                {% if post['type'] == 'photo' %}
+    <div class="content">
+        <div class="post-container">
+            <div class="post-title">{{ post['title'] }}</div>
+            <div class="post-content" >
+                {% if post.type == 'photo' %}
                     <img src="{{ url_for('static', filename=post['content']) }}" alt="{{ post['title'] }}">
-                {% elif post['type'] == 'video' %}
+                {% elif post.type == 'video' %}
                     <video controls>
                         <source src="{{ url_for('static', filename=post['content']) }}" type="video/mp4">
                         Your browser does not support the video tag.
                     </video>
-                {% elif post['type'] == 'text' %}
+                {% elif post.type == 'text' %}
                     <p>{{ post['content'] }}</p>
                 {% endif %}
-                <p>Uploaded by: {{ post['uploader'] }}</p>
-                <div class="actions">
-                    <a href="{{ url_for('post', post_id=post['_id']) }}">Comments</a>
-                    {% if post['user'] == username %}
-                        <form action="{{ url_for('delete_post', post_id=post['_id']) }}" method="post">
-                            <button type="submit">Delete</button>
+
+                    <div class="post-reactions" style=" background: none; cursor: pointer; 
+                    font-size: 1.5em;">
+                        <p>❤️{{ post['likes'] }} Likes </p>
+                        
+                    </div>
+            </div>
+        </div>
+
+        <div class="comments-section">
+            <h3>Comments</h3>
+            <div class="add-comment" >
+                <h4>Add a Comment</h4>
+                <form action="{{ url_for('add_comment') }}" method="post">
+                    <input type="hidden" name="post_id" value="{{ post['_id'] }}">
+                    <textarea name="comment" rows="4" required></textarea>
+                    <button type="submit">Add Comment</button>
+                </form>
+            </div>
+            {% for comment in comments %}
+                <div class="comment-box" style="font-size:1.25em;margin-top: 15px;">
+                    <div class="comment-username" style="font-color: black";>{{ comment['username'] }}</div>
+                    <div class="comment-text" style="font-color: black";>{{ comment['comment'] }}</div>
+                    <div class="abusive-text"  style="font-color: blue";>
+                        {% if comment['username'] == session['username'] or post['username'] == session['username'] %}
+                            {% if comment['abusive']!=''%}
+                                <p> Entered abusive comment : {{comment['abusive']}} </p>
+                            {% endif%}
+                        {% endif %}
+                    </div>
+                    
+                    <div class="reactions" style="display: flex; justify-content: flex-start;">
+                    
+                        <form action="{{ url_for('react_to_comment', comment_id=comment['_id'], post_id=post['_id']) }}" method="post">
+                            <input type="hidden" name="reaction" value="like">
+                           
+                            <button type="submit" style="justify-content: flex-start; background: none; cursor: pointer; 
+                            font-size: 1.5em;" {% if 'like' in comment['reactions'][session.username] %}disabled{% endif %}>
+                                {% if 'like' in comment['reactions'][session.username] %}
+                                    ❤️{{ comment['likes'] }} Like
+                                {% else %}
+                                    ❤️{{ comment['likes'] }} Like
+                                {% endif %}
+                            </button>
+                            
                         </form>
-                    {% endif %}
+                        
+                    </div>
+                    <div class='delete'>
+                        {% if comment['username'] == session['username'] %}
+                            <form action="{{ url_for('delete_comment', comment_id=comment['_id'], post_id=post['_id']) }}" method="post">
+                                <button type="submit" style="font-size: .75em; padding: 10px 20px; border-radius: 5px;">Delete</button>
+                            </form>
+                        {% endif %}
+                    </div>
                 </div>
-                <div class="reactions">
-                    <form action="{{ url_for('react_to_post', post_id=post['_id']) }}" method="post">
-                        <input type="hidden" name="reaction" value="like">
-                        <button type="submit" {% if 'like' in post['reactions'].get(session.username, []) %}disabled{% endif %}>{{ post['likes'] }} Likes</button>
-                    </form>
-                    <form action="{{ url_for('react_to_post', post_id=post['_id']) }}" method="post">
-                        <input type="hidden" name="reaction" value="dislike">
-                        <button type="submit" {% if 'dislike' in post['reactions'].get(session.username, []) %}disabled{% endif %}>{{ post['dislikes'] }} Dislikes</button>
-                    </form>
-                </div>
-            </div>
-        {% endfor %}
+            {% endfor %}
+            
+        </div>
     </div>
 
-    <div class="upload-button">
-        <button onclick="openUploadForm()">+</button>
-    </div>
-
-    <div class="upload-form-modal" id="uploadFormModal">
-        <h2>Upload New Post</h2>
-        <form action="{{ url_for('upload_file') }}" method="post" enctype="multipart/form-data">
-            <label>
-                <input type="radio" name="post_type" value="text" onclick="showInputFields()" checked> Text
-            </label>
-            <label>
-                <input type="radio" name="post_type" value="photo" onclick="showInputFields()"> Photo
-            </label>
-            <label>
-                <input type="radio" name="post_type" value="video" onclick="showInputFields()"> Video
-            </label>
-            <div id="textFields">
-                <input type="text" name="title" placeholder="Title" required>
-                <textarea name="text" placeholder="Write something..."></textarea>
-            </div>
-            <div id="photoFields" style="display:none">
-                <input type="text" name="title" placeholder="Title" required>
-                <input type="file" name="photo" accept="image/*">
-            </div>
-            <div id="videoFields" style="display:none">
-                <input type="text" name="title" placeholder="Title" required>
-                <input type="file" name="video" accept="video/mp4">
-            </div>
-            <button type="submit">Upload</button>
-        </form>
-        <button onclick="closeUploadForm()">Close</button>
-    </div>
-
-    <div class="overlay" id="overlay" onclick="closeUploadForm()"></div>
+    <script>
+        // JavaScript to add fixed navigation bar on scroll
+        window.addEventListener('scroll', function() {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 0) {
+                navbar.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+            } else {
+                navbar.style.boxShadow = 'none';
+            }
+        });
+    </script>
 </body>
 </html>

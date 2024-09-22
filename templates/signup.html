@@ -3,20 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Signup</title>
+    <link rel="icon" href="{{ url_for('static', filename='icon.png') }}" type="image/png">
+    <title>Sign-up</title>
+
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+    <img src="{{ url_for('static', filename='icon.png') }}" alt="Signup Image" style="width: 150px; height: 150px; border-radius: 50%;">
+    <h1>Trendze</h1>
+
+
     <h1>Signup</h1>
-    <form method="POST">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required><br>
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required><br>
-        <button type="submit">Signup</button>
-    </form>
-    <p>{{ get_flashed_messages()[0] if get_flashed_messages() else '' }}</p>
-    <a href="{{ url_for('login_route') }}">Already have an account? Login here</a>
+    <div class='signup_form' style="width: 50%; margin: auto;">
+        <form method="POST">
+            <div style="display: flex; justify-content: space-between;">
+                <div style="flex: 1; margin-right: 15px;">
+                    <input type="text" id="firstname" name="firstname" placeholder="Firstname" style="font-size:1.5em;width: 100%;" required><br>
+                </div>
+                <div style="flex: 1;">
+                    <input type="text" id="lastname" name="lastname" placeholder="Lastname" style="font-size:1.5em;width: 100%;" required><br>
+                </div>
+            </div>
+            <input type="text" id="username" name="username" placeholder="Username" style="font-size:1.5em;width: 100%; margin-top: 15px;" required><br>
+            <input type="email" id="email" name="email" placeholder="Email-id" style="font-size:1.5em;width: 100%; margin-top: 15px;" required><br>
+            <input type="tel" id="phonenumber" name="phonenumber" pattern="[0-9]{10}" placeholder="Phone Number" style="font-size:1.5em;width: 100%; margin-top: 15px;" required><br>
+            <input type="password" id="password" name="password" placeholder="Password" style="font-size:1.5em;width: 100%; margin-top: 15px;" required><br>
+            <input type="password" id="confirmpassword" name="confirmpassword" placeholder="Confirm Password" style="font-size:1.5em;width: 100%; margin-top: 15px;" required><br>
+            <button type="submit" style="font-size:1.5em;margin-top: 15px;">Signup</button>
+        </form>
+        <p>{{ get_flashed_messages()[0] if get_flashed_messages() else '' }}</p>
+        <a href="{{ url_for('login_route') }}" style="font-size:1em;margin-top: 15px;">Already have an account? Login here</a>
+    </div>
+    
+    
+    
 </body>
 </html>
  

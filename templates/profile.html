@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{{ url_for('static', filename='icon.png') }}" type="image/png">
+    <title>Profile</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div style="display: flex; align-items: center; justify-content: center; ">
+        <img src="{{ url_for('static', filename='icon.png') }}" alt="Signup Image" style="width: 150px; height: 150px; border-radius: 50%; margin-right: 15px;">
+        <h1 style="margin: 0;">Tendze </h1>
+    </div>
+    <div class="profile_data">
+        <h1>Welcome, {{ session['username'] }}!</h1>
+        <button onclick="window.location.href='{{ url_for('dashboard') }}'" style="font-size: 1.5em; margin-right: 10px; background-color: #007bff; color: white; border: none; padding: 10px 15px; cursor: pointer;">
+            Dashboard
+        </button>
+        <button onclick="window.location.href='{{ url_for('logout') }}'" style="font-size: 1.5em; background-color: #dc3545; color: white; border: none; padding: 10px 15px; cursor: pointer;">
+            Logout
+        </button>
+        <h2> My Posts</h2>
+
+
+    </div>
+    
+    <div class="posts_view" >
+        {% for post in posts %}
+            {% if post['user'] == username %}
+                <a href="{{ url_for('post', post_id=post['_id']) }}" class="post-link">
+                    <div class="post" style="width: 600px; height: 575px;">
+                        <h2>{{ post['uploader'] }}</h2>
+        
+                        {% if post['type'] == 'photo' %}
+                            <img src="{{ url_for('static', filename=post['content']) }}" alt="{{ post['title'] }}" style= "width: 400px; height: 350px;">
+                        {% elif post['type'] == 'video' %}
+                            <video controls>
+                                <source src="{{ url_for('static', filename=post['content']) }}" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                        {% elif post['type'] == 'text' %}
+                            <p>{{ post['content'] }}</p>
+                        {% endif %}
+        
+                        <h3>{{ post['title'] }}</h3>
+                        <div class="post-reactions" style=" background: none; cursor: pointer; 
+                    font-size: 1.5em;">
+                        <p>❤️{{ post['likes'] }} Likes </p>
+                        
+                    </div>
+                        <div class="actions" style="display: flex; align-items: center; justify-content: center;">
+                            {% if post['user'] == username %}
+                                <form action="{{ url_for('delete_post', post_id=post['_id']) }}" method="post">
+                                    <button type="submit" style="font-size: .75em; padding: 10px 20px; border-radius: 5px;">Delete</button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                </a>
+            {% endif %}
+        {% endfor %}
+    </div>
+    
+    
+    
+    
+    
+</body>
+</html>

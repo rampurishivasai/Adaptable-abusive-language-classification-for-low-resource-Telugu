@@ -3,18 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flask App</title>
+    <link rel="icon" href="{{ url_for('static', filename='icon.png') }}" type="image/png">
+    <title>Trendze App</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
 </head>
-<body>
-    <h1>Welcome to Flask</h1>
+<body >
+    <img src="{{ url_for('static', filename='icon.png') }}" alt="Signup Image" style="width: 150px; height: 150px; border-radius: 50%;">
+    <h1>Welcome to Trendze</h1>
     {% if 'username' in session %}
-        <p>Welcome, {{ session['username'] }}!</p>
-        <a href="{{ url_for('dashboard') }}">Dashboard</a> | 
-        <a href="{{ url_for('logout') }}">Logout</a>
-    {% else %}
-        <a href="{{ url_for('login_route') }}">Login</a> | 
-        <a href="{{ url_for('signup_route') }}">Signup</a>
+        <h1>Welcome, {{ session['username'] }}!</h1>
+        <button onclick="window.location.href='{{ url_for('dashboard') }}'" style="font-size: 1.5em; margin-right: 10px; background-color: #007bff; color: white; border: none; padding: 10px 15px; cursor: pointer;">
+            Dashboard
+        </button>
+        <button onclick="window.location.href='{{ url_for('logout') }}'" style="font-size: 1.5em; background-color: #dc3545; color: white; border: none; padding: 10px 15px; cursor: pointer;">
+            Logout
+        </button>
+        
+    {% else %} 
+        <button onclick="window.location.href='{{ url_for('login_route') }}'" style="font-size: large; margin-right: 10px; background-color: #007bff; color: white; border: none; padding: 10px 15px; cursor: pointer;">
+            Login
+        </button>
+        <button onclick="window.location.href='{{ url_for('signup_route') }}'" style="font-size: large; background-color: #28a745; color: white; border: none; padding: 10px 15px; cursor: pointer;">
+            Signup
+        </button>
+    
     {% endif %}
 </body>
 </html>
