@@ -1,0 +1,127 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #1d76c526;
+    color: #333;
+    text-align: center;
+    padding: 50px;
+    background-image: url("bg.jpg");
+    background-position: center; /* Center the image */
+  background-repeat: no-repeat; /* Do not repeat the image */
+  background-size: cover;
+}
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #f8f9fa;
+    padding: 10px 20px 20px 5px;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* Home and logout buttons */
+.navbar-btn {
+    text-decoration: none;
+    justify-content: space-evenly;
+    color: #007bff;
+    font-weight: bold;
+    padding: 5px 10px;
+    border: 1px solid transparent;
+    border-radius: 5px;
+}
+
+.navbar-btn:hover {
+    background-color: #007bff;
+    color: #fff;
+}
+
+/* Dashboard and post content */
+.content {
+    margin-top: 60px; /* Adjust for the height of the fixed navbar */
+    display: flex;
+    justify-content: center;
+}
+.post-container {
+    margin: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    max-width: 800px; /* Adjust as needed */
+}
+.post-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+.post-content {
+    width: 100%;
+    margin-bottom: 20px;
+}
+.post-content img, .post-content video {
+    width: 100%;
+    border-radius: 10px;
+}
+.post-content video {
+    max-height: 400px; /* Adjust maximum height for videos */
+}
+.reactions {
+    display: flex;     
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+.reactions span {
+    cursor: pointer;
+    font-size: 24px;
+}
+.reaction-selected {
+    background-color: #007bff; /* Change the background color to blue */
+    color: white; /* Change the text color to white */
+}
+.comments-section {
+    flex: 1;
+    margin-left: 20px;
+    overflow-y: auto; /* Enable vertical scroll */
+    padding-right: 10px; /* Ensure scroll doesn't overlap content */
+    max-height: calc(100vh - 120px); /* Adjust max height as needed */
+}
+.comments-section h3 {
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+.comment-box {
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+.comment-box .comment-username {
+    font-weight: bold;
+}
+.add-comment {
+    margin-top: 20px;
+}
+.add-comment h4 {
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+.add-comment textarea {
+    width: 100%;
+    resize: vertical; /* Allow vertical resizing of textarea */
+}
+.add-comment button {
+    margin-top: 10px;
+    padding: 8px 16px;
+    font-size: 16px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+body{
+    background-color: #1d76c526;
+}
