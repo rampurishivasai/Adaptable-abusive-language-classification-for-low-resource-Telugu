@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{{ url_for('static', filename='icon.png') }}" type="image/png">
     <title>Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     
@@ -21,7 +22,10 @@
 </head>
 <body>
     <div class="header">
-        <h1>Welcome, {{ username }}!</h1>
+        <div style="display: flex; align-items: center; justify-content: center; ">
+            <img src="{{ url_for('static', filename='icon.png') }}" alt="Signup Image" style="width: 50px; height: 50px; border-radius: 50%; margin-right: 15px;">
+            <h1>Welcome, {{ username }}!</h1>
+        </div>
         <div class="navbar">
             <a href="{{ url_for('dashboard') }}" class="navbar-btn">Dashboard</a>
             <a href="{{ url_for('home') }}" class="navbar-btn">Home</a>
@@ -53,18 +57,42 @@
                         <button type="submit">Delete</button>
                     </form>
                 {% endif %}
+
+                <h3>{{ post['title'] }}</h3>
+                
+                <div class="reactions" >
+                    <form action="{{ url_for('react_to_post', post_id=post['_id']) }}" method="post">
+                        <input type="hidden" name="reaction" value="like">
+                        {#{% comment %} <button type="submit" {% if 'like' in post['reactions'][session.username] %}disabled{% endif %}>
+                            ❤️{{ post['likes'] }} 
+                        </button> {% endcomment %}#}
+                        <button type="submit" style=" background: none; cursor: pointer; 
+                        font-size: 1.5em;" {% if 'like' in post['reactions'][session.username] %}disabled{% endif %}>
+                            {% if 'like' in post['reactions'][session.username] %}
+                                ❤️{{ post['likes']  }} Like
+                            {% else %}
+                                ❤️{{ post['likes'] }} Like
+                            {% endif %}
+                        </button>
+                        
+                    </form>
+                    {#<form action="{{ url_for('react_to_post', post_id=post['_id']) }}" method="post">
+                        <input type="hidden" name="reaction" value="dislike">
+                        <button type="submit" {% if 'dislike' in post['reactions'][session.username] %}disabled{% endif %}>
+                            {{ post['dislikes'] }} Dislikes
+                        </button>
+                    </form>#}
+                </div>
+                <div class="actions" style="align-items: center; justify-content: center; ">
+                    {#<a href="{{ url_for('post', post_id=post['_id']) }}">Comments</a>#} {# this is for comments in jinja 2#}
+                    {% if post['user'] == username %}
+                        <form action="{{ url_for('delete_post', post_id=post['_id']) }}" method="post">
+                            <button type="submit" style="font-size: .75em; padding: 10px 20px; border-radius: 5px;">Delete</button>
+                        </form>
+                    {% endif %}
+                </div>
             </div>
-            <div class="reactions">
-                <form action="{{ url_for('react_to_post', post_id=post['_id']) }}" method="post">
-                    <input type="hidden" name="reaction" value="like">
-                    <button type="submit" {% if 'like' in post['reactions'][session.username] %}disabled{% endif %}>{{ post['likes'] }} Likes</button>
-                </form>
-                <form action="{{ url_for('react_to_post', post_id=post['_id']) }}" method="post">
-                    <input type="hidden" name="reaction" value="dislike">
-                    <button type="submit" {% if 'dislike' in post['reactions'][session.username] %}disabled{% endif %}>{{ post['dislikes'] }} Dislikes</button>
-                </form>
-            </div>
-        </div>
+        </a>
     {% endfor %}
 </div> {% endcomment %}
 #}

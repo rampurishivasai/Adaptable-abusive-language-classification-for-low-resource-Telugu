@@ -36,16 +36,40 @@ def allowed_file(filename):
 def home():
     return render_template('index.html')
 
+@app.route('/profile')
+def profile():
+    if 'username' in session:
+        username = session['username']
+        posts = list(posts_collection.find())
+        for post in posts:
+            post['uploader'] = users_collection.find_one({'username': post['user']})['username']
+            post['reactions'] = post.get('reactions', {})  # Ensure 'reactions' field exists
+        return render_template('profile.html', username=username, posts=posts)
+    else:
+        flash('You are not logged in')
+        return redirect(url_for('login_route'))
+
 @app.route('/signup', methods=['GET', 'POST'])
 def signup_route():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
+        firstname=request.form['firstname']
+        lastname=request.form['lastname']
+        email=request.form['email']
+        phonenumber=request.form['phonenumber']
         if users_collection.find_one({'username': username}):
             flash('User already exists')
         else:
             hash_password = generate_password_hash(password)
-            users_collection.insert_one({'username': username, 'password': hash_password})
+            users_collection.insert_one({
+                'firstname': firstname,
+                'lastname': lastname, 
+                'email': email,
+                'username': username, 
+                'password': hash_password, 
+                'phonenumber': phonenumber 
+                })
             flash('Signup successful')
             return redirect(url_for('login_route'))
     return render_template('signup.html')
@@ -120,7 +144,10 @@ def add_comment():
 
 @app.route('/delete_comment/<comment_id>/<post_id>', methods=['POST'])
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 97a655a31a2060e3e90f1fb53ecc7da0d6fa730a
 def delete_comment(comment_id, post_id):
     if 'username' in session:
         comments_collection.delete_one({'_id': ObjectId(comment_id), 'username': session['username']})
@@ -129,6 +156,10 @@ def delete_comment(comment_id, post_id):
     else:
         flash('You are not logged in')
         return redirect(url_for('login_route'))
+<<<<<<< HEAD
+=======
+
+>>>>>>> 97a655a31a2060e3e90f1fb53ecc7da0d6fa730a
 @app.route('/upload', methods=['POST'])
 
 def upload_file():
@@ -249,8 +280,8 @@ def react_to_post(post_id):
 @app.route('/react_to_comment/<comment_id>/<post_id>', methods=['POST'])
 def react_to_comment(comment_id, post_id):
     if 'username' in session:
+        username = session['username']
         reaction = request.form['reaction']
-        user_id = session.get('user_id')
         comment = comments_collection.find_one({'_id': ObjectId(comment_id)})
         if comment:
             # reactions = comment.get('reactions', {})

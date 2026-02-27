@@ -3,10 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{{ url_for('static', filename='icon.png') }}" type="image/png">
     <title>Login</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+    <div style="display: flex; align-items: center; justify-content: center; ">
+        <img src="{{ url_for('static', filename='icon.png') }}" alt="Signup Image" style="width: 150px; height: 150px; border-radius: 50%; margin-right: 15px;">
+        <h1 style="margin: 0;">Trendze</h1>
+    </div>
+    
+    
     <h1>Login</h1>
     <form method="POST">
         <label for="username">Username:</label>
