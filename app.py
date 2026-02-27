@@ -144,10 +144,6 @@ def add_comment():
 
 @app.route('/delete_comment/<comment_id>/<post_id>', methods=['POST'])
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 97a655a31a2060e3e90f1fb53ecc7da0d6fa730a
 def delete_comment(comment_id, post_id):
     if 'username' in session:
         comments_collection.delete_one({'_id': ObjectId(comment_id), 'username': session['username']})
@@ -156,10 +152,6 @@ def delete_comment(comment_id, post_id):
     else:
         flash('You are not logged in')
         return redirect(url_for('login_route'))
-<<<<<<< HEAD
-=======
-
->>>>>>> 97a655a31a2060e3e90f1fb53ecc7da0d6fa730a
 @app.route('/upload', methods=['POST'])
 
 def upload_file():
