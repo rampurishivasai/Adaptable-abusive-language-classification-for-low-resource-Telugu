@@ -2,12 +2,15 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from werkzeug.utils import secure_filename
 from pymongo import MongoClient
 from bson.objectid import ObjectId
+# from flask import Flask
+# from flask_wtf.csrf import CSRFProtect
 from werkzeug.security import generate_password_hash, check_password_hash
 from model import load_svm_model, classify_text
 from PIL import Image
 import os
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
+# csrf = CSRFProtect(app)
 
 # Configure MongoDB
 client = MongoClient('mongodb://localhost:27017/')
@@ -15,6 +18,9 @@ db = client['flask_app']
 users_collection = db['users']
 posts_collection = db['posts']
 comments_collection = db['comments']
+reactions_collection = db['post_reactions']
+comment_reactions_collection = db['comment_reactions']
+
 
 # Configure file upload
 UPLOAD_FOLDER = 'static/uploads'
@@ -112,63 +118,65 @@ def add_comment():
         flash('You are not logged in')
         return redirect(url_for('login_route'))
 
-@app.route('/delete_comment/<comment_id>/<post_id>')
+@app.route('/delete_comment/<comment_id>/<post_id>', methods=['POST'])
+
+
 def delete_comment(comment_id, post_id):
     if 'username' in session:
         comments_collection.delete_one({'_id': ObjectId(comment_id), 'username': session['username']})
+        flash('Comment deleted successfully')
         return redirect(url_for('post', post_id=post_id))
     else:
         flash('You are not logged in')
         return redirect(url_for('login_route'))
-
 @app.route('/upload', methods=['POST'])
+
 def upload_file():
     if 'username' in session:
-        title = request.form['title']
-        text_content = request.form.get('text', '')
-
-        # Check if any file or text content is provided
-        file = request.files.get('photo') or request.files.get('video')
-        if not file and not text_content:
-            flash('No content provided')
-            return redirect(url_for('dashboard'))
-
-        type = None
-        content = None
-
-        if file and file.filename != '':
-            if allowed_file(file.filename):
-                filename = secure_filename(file.filename)
-                file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                file.save(file_path)
-
-                if file.mimetype.startswith('image'):
-                    type = 'photo'
-                    resized_path = os.path.join(app.config['UPLOAD_FOLDER'], 'resized_' + filename)
-                    with Image.open(file_path) as img:
-                        img.thumbnail((800, 600))  # Set the maximum dimensions
-                        img.save(resized_path)
-                    content = 'uploads/resized_' + filename
-                elif file.mimetype.startswith('video'):
-                    type = 'video'
-                    content = 'uploads/' + filename
+        # Check if the post request has the file part
+        if 'photo' not in request.files and 'video' not in request.files:
+            flash('No file part')
+            return redirect(request.url)
+        
+        # Get the file from the request
+        file = request.files['photo'] if 'photo' in request.files else request.files['video']
+        
+        # If user does not select file, browser also submits an empty part without filename
+        if file.filename == '':
+            flash('No selected file')
+            return redirect(request.url)
+        
+        # If file is selected and allowed, save it
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(file_path)
+            
+            # Determine content type (photo or video)
+            if file.content_type.startswith('image'):
+                type = 'photo'
+                resized_path = os.path.join(app.config['UPLOAD_FOLDER'], 'resized_' + filename)
+                with Image.open(file_path) as img:
+                    img.thumbnail((800, 600))  # Resize if necessary
+                    img.save(resized_path)
+                content = 'uploads/resized_' + filename
+            elif file.content_type.startswith('video'):
+                type = 'video'
+                content = 'uploads/' + filename
             else:
-                flash('File type not allowed')
-                return redirect(url_for('dashboard'))
-        elif text_content:
-            type = 'text'
-            content = text_content
-
-        if type and content:
+                flash('Invalid file type')
+                return redirect(request.url)
+            
+            # Insert into database or perform other actions
             posts_collection.insert_one({
                 'user': session['username'],
-                'title': title,
+                'title': request.form['title'],
                 'content': content,
                 'type': type,
                 'likes': 0,
-                'dislikes': 0,
-                'reactions': {}  # Initialize reactions as an empty dictionary
+                'dislikes': 0
             })
+            
             return redirect(url_for('dashboard'))
         else:
             flash('Error uploading content')
@@ -183,21 +191,61 @@ def delete_post(post_id):
         post = posts_collection.find_one({'_id': ObjectId(post_id)})
         if post and post['user'] == session['username']:
             posts_collection.delete_one({'_id': ObjectId(post_id)})
+            # reactions_collection.delete_many({'post_id': post_id})
         return redirect(url_for('dashboard'))
     else:
         flash('You are not logged in')
         return redirect(url_for('login'))
 
 @app.route('/react_to_post/<post_id>', methods=['POST'])
+# def react_to_post(post_id):
+#     if 'username' in session:
+#         reaction = request.form['reaction']
+#         post = posts_collection.find_one({'_id': ObjectId(post_id)})
+#         if reaction == 'like':
+#             posts_collection.update_one({'_id': ObjectId(post_id)}, {'$inc': {'likes': 1}})
+#         elif reaction == 'dislike':
+#             posts_collection.update_one({'_id': ObjectId(post_id)}, {'$inc': {'dislikes': 1}})
+#         return redirect(url_for('dashboard'))
+
 def react_to_post(post_id):
     if 'username' in session:
+        username = session['username']
         reaction = request.form['reaction']
         post = posts_collection.find_one({'_id': ObjectId(post_id)})
+
+        # Update reactions in post_reactions collection
+        existing_reaction = reactions_collection.find_one({'post_id': post_id, 'username': username})
+        
         if reaction == 'like':
-            posts_collection.update_one({'_id': ObjectId(post_id)}, {'$inc': {'likes': 1}})
+            # Update post likes and handle existing reaction
+            if existing_reaction and existing_reaction['reaction'] == 'like':
+                # User already liked, remove like
+                posts_collection.update_one({'_id': ObjectId(post_id)}, {'$inc': {'likes': -1}})
+                reactions_collection.delete_one({'post_id': post_id, 'username': username})
+            else:
+                # User disliked before, update to like
+                if existing_reaction and existing_reaction['reaction'] == 'dislike':
+                    posts_collection.update_one({'_id': ObjectId(post_id)}, {'$inc': {'dislikes': -1}})
+                posts_collection.update_one({'_id': ObjectId(post_id)}, {'$inc': {'likes': 1}})
+                reactions_collection.update_one({'post_id': post_id, 'username': username}, {'$set': {'reaction': 'like'}}, upsert=True)
+
         elif reaction == 'dislike':
-            posts_collection.update_one({'_id': ObjectId(post_id)}, {'$inc': {'dislikes': 1}})
-        return redirect(url_for('dashboard'))
+            # Update post dislikes and handle existing reaction
+            if existing_reaction and existing_reaction['reaction'] == 'dislike':
+                # User already disliked, remove dislike
+                posts_collection.update_one({'_id': ObjectId(post_id)}, {'$inc': {'dislikes': -1}})
+                reactions_collection.delete_one({'post_id': post_id, 'username': username})
+            else:
+                # User liked before, update to dislike
+                if existing_reaction and existing_reaction['reaction'] == 'like':
+                    posts_collection.update_one({'_id': ObjectId(post_id)}, {'$inc': {'likes': -1}})
+                posts_collection.update_one({'_id': ObjectId(post_id)}, {'$inc': {'dislikes': 1}})
+                reactions_collection.update_one({'post_id': post_id, 'username': username}, {'$set': {'reaction': 'dislike'}}, upsert=True)
+
+    return redirect(url_for('dashboard'))
+
+
 @app.route('/react_to_comment/<comment_id>/<post_id>', methods=['POST'])
 def react_to_comment(comment_id, post_id):
     if 'username' in session:
@@ -205,37 +253,46 @@ def react_to_comment(comment_id, post_id):
         user_id = session.get('user_id')
         comment = comments_collection.find_one({'_id': ObjectId(comment_id)})
         if comment:
-            reactions = comment.get('reactions', {})
-            if user_id not in reactions:
-                if reaction == 'like':
+            # reactions = comment.get('reactions', {})
+            # if user_id not in reactions:
+            #     if reaction == 'like':
+            #         comments_collection.update_one(
+            #             {'_id': ObjectId(comment_id)},
+            #             {'$inc': {'likes': 1}, '$set': {'reactions.' + user_id: reaction}}
+            #         )
+            #         if 'dislike' in reactions and reactions[user_id] == 'dislike':
+            #             comments_collection.update_one(
+            #                 {'_id': ObjectId(comment_id)},
+            #                 {'$inc': {'dislikes': -1}, '$unset': {'reactions.' + user_id: ''}}
+            #             )
+            #     elif reaction == 'dislike':
+            #         comments_collection.update_one(
+            #             {'_id': ObjectId(comment_id)},
+            #             {'$inc': {'dislikes': 1}, '$set': {'reactions.' + user_id: reaction}}
+            #         )
+            #         if 'like' in reactions and reactions[user_id] == 'like':
+            #             comments_collection.update_one(
+            #                 {'_id': ObjectId(comment_id)},
+            #                 {'$inc': {'likes': -1}, '$unset': {'reactions.' + user_id: ''}}
+            #             )
+            existing_reaction = comment_reactions_collection.find_one({'comment_id': comment_id, 'user_id': user_id})
+            if not existing_reaction:
+                if reaction in ['😊', '😂', '😭', '😡']:  # List of allowed emoji reactions
                     comments_collection.update_one(
                         {'_id': ObjectId(comment_id)},
-                        {'$inc': {'likes': 1}, '$set': {'reactions.' + user_id: reaction}}
+                        {'$inc': {reaction + '_count': 1}}
                     )
-                    if 'dislike' in reactions and reactions[user_id] == 'dislike':
-                        comments_collection.update_one(
-                            {'_id': ObjectId(comment_id)},
-                            {'$inc': {'dislikes': -1}, '$unset': {'reactions.' + user_id: ''}}
-                        )
-                elif reaction == 'dislike':
-                    comments_collection.update_one(
-                        {'_id': ObjectId(comment_id)},
-                        {'$inc': {'dislikes': 1}, '$set': {'reactions.' + user_id: reaction}}
-                    )
-                    if 'like' in reactions and reactions[user_id] == 'like':
-                        comments_collection.update_one(
-                            {'_id': ObjectId(comment_id)},
-                            {'$inc': {'likes': -1}, '$unset': {'reactions.' + user_id: ''}}
-                        )
+                    comment_reactions_collection.insert_one({
+                        'comment_id': comment_id,
+                        'user_id': user_id,
+                        'reaction': reaction
+                    })
             else:
                 flash('You have already reacted to this comment.')
         else:
             flash('Comment not found.')
-        
-        return redirect(url_for('post', post_id=post_id))
     else:
-        flash('You are not logged in')
-        return redirect(url_for('login_route'))
+        flash('You must be logged in to react to comments.')
 
 
 if __name__ == '__main__':
